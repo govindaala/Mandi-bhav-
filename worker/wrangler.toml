@@ -1,0 +1,13 @@
+name = "mandi-bhav-api"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+FRONTEND_ORIGIN = "https://YOUR-USERNAME.github.io"
+
+# Set secrets with:
+# wrangler secret put TURSO_DATABASE_URL
+# wrangler secret put TURSO_AUTH_TOKEN
+# wrangler secret put SESSION_SECRET
+# wrangler secret put BOOTSTRAP_ADMIN_EMAIL
+# wrangler secret put BOOTSTRAP_ADMIN_PASSWORD
