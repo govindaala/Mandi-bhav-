@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>मंडी भाव</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🌾 मंडी भाव</h1>
+      <p>मंडी, व्यापारी और स्थानीय बाजार डेटा</p>
+    </div>
+    <button id="logoutBtn" class="secondary hidden">Logout</button>
+  </header>
+
+  <main>
+    <section id="loginCard" class="card">
+      <h2>एक ही Login</h2>
+      <p class="muted">सिस्टम आपके खाते की भूमिका अपने-आप पहचानता है।</p>
+      <form id="loginForm">
+        <label>मोबाइल / ईमेल
+          <input id="login" autocomplete="username" required>
+        </label>
+        <label>पासवर्ड
+          <input id="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Login</button>
+      </form>
+      <div id="loginMsg" class="message"></div>
+    </section>
+
+    <section id="app" class="hidden">
+      <div class="card welcome">
+        <div>
+          <h2 id="welcome"></h2>
+          <p id="roleLabel" class="muted"></p>
+        </div>
+      </div>
+
+      <section id="adminPanel" class="hidden">
+        <div class="grid">
+          <div class="card">
+            <h3>Users</h3>
+            <button id="loadUsers">Users देखें</button>
+            <div id="users"></div>
+          </div>
+          <div class="card">
+            <h3>नया User</h3>
+            <form id="createUserForm">
+              <input id="newName" placeholder="नाम" required>
+              <input id="newLogin" placeholder="मोबाइल/ईमेल" required>
+              <input id="newPhone" placeholder="फोन">
+              <input id="newPassword" type="password" placeholder="Password (8+)" required>
+              <select id="newRole"></select>
+              <button type="submit">User बनाएं</button>
+            </form>
+          </div>
+          <div class="card">
+            <h3>नया Role</h3>
+            <form id="createRoleForm">
+              <input id="roleName" placeholder="जैसे MANDI_INSPECTOR" required>
+              <input id="roleDescription" placeholder="विवरण">
+              <button type="submit">Role बनाएं</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="traderPanel" class="card hidden">
+        <h3>व्यापारी Dashboard</h3>
+        <p>यहाँ से व्यापारी quality-wise rate submit करेगा।</p>
+        <div class="notice">Price-entry form को अगले चरण में database fields से जोड़ा जा सकता है।</div>
+      </section>
+
+      <section id="journalistPanel" class="card hidden">
+        <h3>पत्रकार Dashboard</h3>
+        <p>स्थानीय मंडी रिपोर्ट, स्रोत और भाव submit करें।</p>
+        <div class="notice">Report-entry form को अगले चरण में जोड़ा जा सकता है।</div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
