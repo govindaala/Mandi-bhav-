@@ -4,7 +4,7 @@ compatibility_date = "2026-09-01"
 keep_vars = true
 
 [vars]
-FRONTEND_ORIGIN = "https://YOUR-USERNAME.github.io"
+FRONTEND_ORIGIN = "https://govindaala.github.io"
 
 # Set secrets with:
 # wrangler secret put TURSO_DATABASE_URL
