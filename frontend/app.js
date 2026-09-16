@@ -1,15 +1,15 @@
-const API = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev/api";
+const BASE_URL = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev";
 
 const $ = (id) => document.getElementById(id);
-const show = (el, yes=true) => el.classList.toggle("hidden", !yes);
+const show = (el, yes = true) => el.classList.toggle("hidden", !yes);
 
-async function api(path, options={}) {
-  const res = await fetch(API + path, {
+async function api(path, options = {}) {
+  const res = await fetch(BASE_URL + path, {
     credentials: "include",
-    headers: {"content-type":"application/json", ...(options.headers||{})},
+    headers: { "content-type": "application/json", ...(options.headers || {}) },
     ...options
   });
-  const data = await res.json().catch(()=>({}));
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
 }
@@ -24,7 +24,7 @@ function renderRole(user) {
 
 async function boot() {
   try {
-    const data = await api("/me", {method:"GET"});
+    const data = await api("/api/me", { method: "GET" });
     if (data.user) {
       show($("loginCard"), false);
       show($("app"), true);
@@ -35,14 +35,14 @@ async function boot() {
   } catch {}
 }
 
-$("loginForm").addEventListener("submit", async (e)=>{
+$("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   $("loginMsg").textContent = "";
   try {
-    const data = await api("/login", {
-      method:"POST",
+    const data = await api("/api/login", {
+      method: "POST",
       body: JSON.stringify({
-        login: $("login").value.trim().toLowerCase(),
+        login: $("login").value.trim(),
         password: $("password").value
       })
     });
@@ -51,26 +51,29 @@ $("loginForm").addEventListener("submit", async (e)=>{
     show($("logoutBtn"), true);
     renderRole(data.user);
     if (data.user.role === "SUPER_ADMIN") await loadRoles();
-  } catch(err) {
+  } catch (err) {
     $("loginMsg").textContent = err.message;
   }
 });
 
-$("logoutBtn").addEventListener("click", async ()=>{
-  await api("/logout",{method:"POST"});
+$("logoutBtn").addEventListener("click", async () => {
+  await api("/api/logout", { method: "POST" });
   location.reload();
 });
 
-async function loadRoles(){
-  const data = await api("/roles");
+async function loadRoles() {
+  const data = await api("/api/roles");
   $("newRole").innerHTML = data.roles
-    .filter(r=>Number(r.is_active))
-    .map(r=>`<option value="${r.id}">${r.name}</option>`).join("");
+    .filter((r) => Number(r.is_active))
+    .map((r) => `<option value="${r.id}">${r.name}</option>`)
+    .join("");
 }
 
-$("loadUsers").addEventListener("click", async ()=>{
-  const data = await api("/users");
-  $("users").innerHTML = data.users.map(u=>`
+$("loadUsers").addEventListener("click", async () => {
+  const data = await api("/api/users");
+  $("users").innerHTML = data.users
+    .map(
+      (u) => `
     <div class="user">
       <div>
         <strong>${escapeHtml(u.name)}</strong>
@@ -80,37 +83,39 @@ $("loadUsers").addEventListener("click", async ()=>{
       <button class="${Number(u.is_blocked) ? "" : "danger"}" onclick="toggleUser('${u.id}',${Number(u.is_blocked)})">
         ${Number(u.is_blocked) ? "Unblock" : "Block"}
       </button>
-    </div>`).join("");
+    </div>`
+    )
+    .join("");
 });
 
 window.toggleUser = async (id, blocked) => {
-  await api(`/users/${id}/${blocked ? "unblock":"block"}`, {method:"POST"});
+  await api(`/api/users/${id}/${blocked ? "unblock" : "block"}`, { method: "POST" });
   $("loadUsers").click();
 };
 
-$("createUserForm").addEventListener("submit", async (e)=>{
+$("createUserForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  await api("/users", {
-    method:"POST",
+  await api("/api/users", {
+    method: "POST",
     body: JSON.stringify({
-      name:$("newName").value,
-      login:$("newLogin").value,
-      phone:$("newPhone").value,
-      password:$("newPassword").value,
-      role_id:$("newRole").value
+      name: $("newName").value,
+      login: $("newLogin").value,
+      phone: $("newPhone").value,
+      password: $("newPassword").value,
+      role_id: $("newRole").value
     })
   });
   e.target.reset();
   alert("User बनाया गया");
 });
 
-$("createRoleForm").addEventListener("submit", async (e)=>{
+$("createRoleForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  await api("/roles", {
-    method:"POST",
+  await api("/api/roles", {
+    method: "POST",
     body: JSON.stringify({
-      name:$("roleName").value,
-      description:$("roleDescription").value
+      name: $("roleName").value,
+      description: $("roleDescription").value
     })
   });
   e.target.reset();
@@ -118,8 +123,11 @@ $("createRoleForm").addEventListener("submit", async (e)=>{
   alert("Role बनाया गया");
 });
 
-function escapeHtml(v){
-  return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function escapeHtml(v) {
+  return String(v).replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c])
+  );
 }
 
 boot();
