@@ -1,4 +1,4 @@
-const API = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev/";
+const API = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev";
 
 const $ = (id) => document.getElementById(id);
 const show = (el, yes=true) => el.classList.toggle("hidden", !yes);
