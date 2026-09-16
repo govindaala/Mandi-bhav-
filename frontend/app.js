@@ -42,7 +42,7 @@ $("loginForm").addEventListener("submit", async (e)=>{
     const data = await api("/login", {
       method:"POST",
       body: JSON.stringify({
-        login: $("login").value.trim().toLowerCase(), // यह अपने आप अक्षरों को छोटा कर देगा
+        login: $("login").value.trim().toLowerCase(),
         password: $("password").value
       })
     });
