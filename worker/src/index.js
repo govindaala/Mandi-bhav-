@@ -43,11 +43,11 @@ async function hashPassword(password, salt = crypto.randomUUID()) {
     ["deriveBits"]
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 120000, hash: "SHA-256" },
+    { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 100000, hash: "SHA-256" },
     key,
     256
   );
-  return `pbkdf2$120000$${salt}$${b64(bits)}`;
+  return `pbkdf2$100000$${salt}$${b64(bits)}`;
 }
 
 async function verifyPassword(password, stored) {
