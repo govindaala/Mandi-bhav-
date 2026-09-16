@@ -39,7 +39,7 @@ $("loginForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   $("loginMsg").textContent = "";
   try {
-    const data = await api("/login", {
+    const data = await api("/api/login", {
       method:"POST",
       body: JSON.stringify({login:$("login").value, password:$("password").value})
     });
