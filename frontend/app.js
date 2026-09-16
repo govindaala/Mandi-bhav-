@@ -1,4 +1,4 @@
-const API = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev";
+const API = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev/api";
 
 const $ = (id) => document.getElementById(id);
 const show = (el, yes=true) => el.classList.toggle("hidden", !yes);
@@ -39,9 +39,12 @@ $("loginForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   $("loginMsg").textContent = "";
   try {
-    const data = await api("/api/login", {
+    const data = await api("/login", {
       method:"POST",
-      body: JSON.stringify({login:$("login").value, password:$("password").value})
+      body: JSON.stringify({
+        login: $("login").value.trim().toLowerCase(), // यह अपने आप अक्षरों को छोटा कर देगा
+        password: $("password").value
+      })
     });
     show($("loginCard"), false);
     show($("app"), true);
