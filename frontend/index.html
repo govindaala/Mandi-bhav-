@@ -82,6 +82,188 @@
     </section>
   </main>
 
-  <script src="./app.js"></script>
+  <script>
+    const BASE_URL = "https://mandi-bhav-api.rajeshsethiyabjp.workers.dev";
+
+    const $ = (id) => document.getElementById(id);
+    const show = (el, yes = true) => el && el.classList.toggle("hidden", !yes);
+
+    function escapeHtml(v) {
+      return String(v).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[c]));
+    }
+
+    async function api(path, options = {}) {
+      let cleanPath = path.startsWith("/") ? path : "/" + path;
+      if (!cleanPath.startsWith("/api")) {
+        cleanPath = "/api" + cleanPath;
+      }
+      const fullUrl = BASE_URL.replace(/\/+$/, "") + cleanPath;
+
+      const res = await fetch(fullUrl, {
+        credentials: "include",
+        headers: { "content-type": "application/json", ...(options.headers || {}) },
+        ...options
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+      return data;
+    }
+
+    function renderRole(user) {
+      if ($("welcome")) $("welcome").textContent = `नमस्ते, ${user.name}`;
+      if ($("roleLabel")) $("roleLabel").textContent = `Role: ${user.role}`;
+      show($("adminPanel"), user.role === "SUPER_ADMIN");
+      show($("traderPanel"), user.role === "MANDI_TRADER");
+      show($("journalistPanel"), user.role === "JOURNALIST");
+    }
+
+    async function loadRoles() {
+      try {
+        const data = await api("/roles");
+        if (data.roles && $("newRole")) {
+          $("newRole").innerHTML = data.roles
+            .filter((r) => Number(r.is_active))
+            .map((r) => `<option value="${r.id}">${escapeHtml(r.name)}</option>`)
+            .join("");
+        }
+      } catch (err) {
+        console.warn("Roles loading error:", err);
+      }
+    }
+
+    async function boot() {
+      try {
+        const data = await api("/me", { method: "GET" });
+        if (data.user) {
+          show($("loginCard"), false);
+          show($("app"), true);
+          show($("logoutBtn"), true);
+          renderRole(data.user);
+          if (data.user.role === "SUPER_ADMIN") loadRoles();
+        }
+      } catch {}
+    }
+
+    if ($("loginForm")) {
+      $("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if ($("loginMsg")) $("loginMsg").textContent = "Logging in...";
+        try {
+          const data = await api("/login", {
+            method: "POST",
+            body: JSON.stringify({
+              login: $("login").value.trim().toLowerCase(),
+              password: $("password").value
+            })
+          });
+
+          if ($("loginMsg")) $("loginMsg").textContent = "";
+          show($("loginCard"), false);
+          show($("app"), true);
+          show($("logoutBtn"), true);
+          renderRole(data.user);
+          if (data.user.role === "SUPER_ADMIN") loadRoles();
+        } catch (err) {
+          if ($("loginMsg")) $("loginMsg").textContent = err.message;
+        }
+      });
+    }
+
+    if ($("logoutBtn")) {
+      $("logoutBtn").addEventListener("click", async () => {
+        try {
+          await api("/logout", { method: "POST" });
+        } catch {}
+        location.reload();
+      });
+    }
+
+    if ($("loadUsers")) {
+      $("loadUsers").addEventListener("click", async () => {
+        try {
+          const data = await api("/users");
+          if ($("users")) {
+            $("users").innerHTML = (data.users || []).map((u) => `
+              <div class="user" style="margin-top:10px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                <div>
+                  <strong>${escapeHtml(u.name)}</strong><br>
+                  <small>${escapeHtml(u.login)} · ${escapeHtml(u.role)}</small><br>
+                  <small>${Number(u.is_blocked) ? "🚫 BLOCKED" : "🟢 ACTIVE"}</small>
+                </div>
+                <button class="${Number(u.is_blocked) ? "" : "danger"}" onclick="toggleUser('${u.id}', ${Number(u.is_blocked)})" style="margin-top:5px;">
+                  ${Number(u.is_blocked) ? "Unblock" : "Block"}
+                </button>
+              </div>
+            `).join("");
+          }
+        } catch (err) {
+          alert("Users load error: " + err.message);
+        }
+      });
+    }
+
+    window.toggleUser = async (id, blocked) => {
+      try {
+        await api(`/users/${id}/${blocked ? "unblock" : "block"}`, { method: "POST" });
+        if ($("loadUsers")) $("loadUsers").click();
+      } catch (err) {
+        alert("Action failed: " + err.message);
+      }
+    };
+
+    if ($("createUserForm")) {
+      $("createUserForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          await api("/users", {
+            method: "POST",
+            body: JSON.stringify({
+              name: $("newName").value,
+              login: $("newLogin").value.trim().toLowerCase(),
+              phone: $("newPhone").value,
+              password: $("newPassword").value,
+              role_id: $("newRole").value
+            })
+          });
+          e.target.reset();
+          alert("User बनाया गया");
+          if ($("loadUsers")) $("loadUsers").click();
+        } catch (err) {
+          alert("User create error: " + err.message);
+        }
+      });
+    }
+
+    if ($("createRoleForm")) {
+      $("createRoleForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          await api("/roles", {
+            method: "POST",
+            body: JSON.stringify({
+              name: $("roleName").value,
+              description: $("roleDescription").value
+            })
+          });
+          e.target.reset();
+          await loadRoles();
+          alert("Role बनाया गया");
+        } catch (err) {
+          alert("Role create error: " + err.message);
+        }
+      });
+    }
+
+    boot();
+  </script>
 </body>
 </html>
